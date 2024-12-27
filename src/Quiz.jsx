@@ -69,6 +69,7 @@ const Quiz = ({ questions }) => {
             ))}
           </ul>
           <div className="footer">
+            <div className="hidden">hello</div>
             <button onClick={onClickNext} disabled={answerIdx === null}>
               {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
             </button>
