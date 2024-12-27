@@ -1,0 +1,23 @@
+
+@import '../index.scss';
+$primary: #150080;
+$accent: #d08642;
+$bg: #ffffff;
+$bg-accent: #e7e8e9;
+$disabled: #9c9c9c;
+$foreground: #2d264b;
+
+.answer-timer-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-bottom: 1px solid $disabled;
+}
+
+.progress {
+    height: 5px;
+    transition-duration: 1s;
+    width: 0;
+    transition-timing-function: linear;
+}

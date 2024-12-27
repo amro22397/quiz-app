@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { resultInitalState } from "./constants/react-quiz-questions";
+import AnswerTimer from './components/AnswerTimer';
 
 const Quiz = ({ questions }) => {
 
@@ -8,8 +9,10 @@ const Quiz = ({ questions }) => {
   const [answer, setAnswer] = useState(null);
   const [result, setResult] = useState(resultInitalState);
   const [showResult, setShowResult] = useState(false);
+  const [showAnswerTimer, setShowAnswerTimer] = useState(true);
+  const [inputAnswer, setInputAnswer] = useState();
 
-  const { question, choices, correctAnswer } = questions[currentQuestion];
+  const { question, choices, correctAnswer, type } = questions[currentQuestion];
 
   
 
@@ -23,10 +26,11 @@ const Quiz = ({ questions }) => {
     }
   }
 
-  const onClickNext = () => {
+  const onClickNext = (finalAnswer) => {
     setAnswerIdx(null);
+    setShowAnswerTimer(false);
     setResult((prev) => 
-    answer ? { 
+    finalAnswer ? { 
       ...prev, 
       correctAnswers: prev.correctAnswers + 1, 
       score: prev.score + 5
@@ -42,6 +46,10 @@ const Quiz = ({ questions }) => {
       setCurrentQuestion(0);
       setShowResult(true);
     }
+
+    setTimeout(() => {
+      setShowAnswerTimer(true);
+    });
   }
 
   const onTryAgain = () => {
@@ -49,15 +57,30 @@ const Quiz = ({ questions }) => {
     setShowResult(false);
   }
 
-  return (
-    <div className="quiz-container">
-        
-      {!showResult ? (
-        <>
-          <span className="active-question-no">{currentQuestion + 1}</span>
-          <span className="total-question">/{questions.length}</span>
-          <h2>{question}</h2>
-          <ul>
+  const onTimeUp = () => {
+    setAnswer(false);
+    onClickNext(false);
+  }
+
+  const handleInputChange = (e) => {
+    setInputAnswer(e.target.value);
+    setAnswerIdx('fill');
+
+    if (e.target.value === correctAnswer) {
+      setAnswer(true);
+    } else {
+      setAnswer(false);
+    }
+  }
+
+  const getAnswerUI = () => {
+
+    if (type === "FIB") {
+      return <input value={inputAnswer} onChange={handleInputChange} />
+    }
+
+    return (
+      <ul>
             {choices.map((choice, index) => (
               <li
                 onClick={() => onAnwswerClick(choice, index)}
@@ -68,9 +91,23 @@ const Quiz = ({ questions }) => {
               </li>
             ))}
           </ul>
+    )
+  }
+
+  return (
+    <div className="quiz-container relative">
+      {!showResult ? (
+        <>
+        {showAnswerTimer && (
+          <AnswerTimer duration={15} onTimeUp={onTimeUp} />
+        )}
+          <span className="active-question-no">{currentQuestion + 1}</span>
+          <span className="total-question">/{questions.length}</span>
+          <h2>{question}</h2>
+          {getAnswerUI()}
           <div className="footer">
             <div className="hidden">hello</div>
-            <button onClick={onClickNext} disabled={answerIdx === null}>
+            <button onClick={() => onClickNext(answer)} disabled={answerIdx === null}>
               {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
             </button>
           </div>
