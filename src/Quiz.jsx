@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { resultInitalState } from "./constants/react-quiz-questions";
 import AnswerTimer from './components/AnswerTimer';
+import Timer from './components/Timer';
 
 const Quiz = ({ questions }) => {
 
@@ -11,6 +12,31 @@ const Quiz = ({ questions }) => {
   const [showResult, setShowResult] = useState(false);
   const [showAnswerTimer, setShowAnswerTimer] = useState(true);
   const [inputAnswer, setInputAnswer] = useState();
+
+  const [timeOut, setTimeOut] = useState(false);
+
+  const [name, setName] = useState('');
+  const [highScores, setHighScores] = useState([]);
+  const [showScore, setShowScore] = useState(false);
+
+useEffect(() => {
+  setHighScores(JSON.parse(localStorage.getItem("highScores")) || []);
+}, []);
+
+  const handleSave = () => {
+      const score = {
+        name,
+        score: result.score,
+      };
+
+      const newHighScore = [...highScores, score].sort(
+        (a, b) => b.score - a.score
+      );
+
+      setHighScores(newHighScore);
+      setShowScore(true);
+      localStorage.setItem("highScores", JSON.stringify(newHighScore));
+  }
 
   const { question, choices, correctAnswer, type } = questions[currentQuestion];
 
@@ -29,6 +55,7 @@ const Quiz = ({ questions }) => {
   const onClickNext = (finalAnswer) => {
     setAnswerIdx(null);
     setShowAnswerTimer(false);
+    setInputAnswer(null);
     setResult((prev) => 
     finalAnswer ? { 
       ...prev, 
@@ -45,6 +72,7 @@ const Quiz = ({ questions }) => {
     } else {
       setCurrentQuestion(0);
       setShowResult(true);
+      setName('');
     }
 
     setTimeout(() => {
@@ -94,13 +122,25 @@ const Quiz = ({ questions }) => {
     )
   }
 
+
+  const handleTryAgain = () => {
+    setShowScore(false);
+    onTryAgain();
+  }
+
   return (
     <div className="quiz-container relative">
       {!showResult ? (
         <>
         {showAnswerTimer && (
-          <AnswerTimer duration={15} onTimeUp={onTimeUp} />
+          <>
+          <AnswerTimer duration={30} onTimeUp={onTimeUp} />
+          <div className="timer">
+          <Timer setTimeOut={setTimeOut} questionNumber={currentQuestion} />
+          </div>
+          </>
         )}
+
           <span className="active-question-no">{currentQuestion + 1}</span>
           <span className="total-question">/{questions.length}</span>
           <h2>{question}</h2>
@@ -127,7 +167,46 @@ const Quiz = ({ questions }) => {
           <p>
             Wrong Answers: <span>{result.wrongAnswers}</span>
           </p>
-          <button onClick={onTryAgain}>Try again</button>
+          <button onClick={handleTryAgain}>Try again</button>
+
+          {!showScore ? 
+          (
+            <>
+          <h3>
+            Enter your name below <br /> to save your score!
+          </h3>
+
+          <input type="text" placeholder='Your Name'
+          value={name} onChange={e => setName(e.target.value)}/>
+
+          <button onClick={handleSave}>Save</button>
+          </>
+          )
+          : (
+          <>
+          <table>
+            <thead>
+              <tr>
+                <th>Ranking</th>
+                <th>Name</th>
+                <th>Score</th>
+              </tr>
+              </thead>
+              <tbody>
+                {highScores.map((highScores, i) => {
+                  return (
+                  <tr key={i} >
+                  <td>{i + 1}</td>
+                  <td>{highScores.name}</td>
+                  <td>{highScores.score}</td>
+                </tr>
+                  )
+                })}
+                
+              </tbody>
+          </table>
+          </>
+          )}
         </div>
       )}
     </div>

@@ -118,3 +118,27 @@ body {
     box-sizing: border-box;
   }
 }
+
+
+table {
+  width: 50%;
+  margin: 50px auto 20px;
+  border-collapse: collapse;
+}
+
+tr {
+  border: 1px solid;
+}
+
+th, td {
+  text-align: center ;
+  padding-right: 5px;
+}
+
+th {
+  font-size: 15px;
+}
+
+td {
+  font-size: 13px;
+}
